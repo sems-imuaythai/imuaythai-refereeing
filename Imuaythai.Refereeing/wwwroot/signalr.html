@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>SignalR client</title>
+
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"
+        ></script>
+        <script
+            type="text/javascript"
+            src="signalr.min.js"
+        ></script>
+
+        <script type="text/javascript">
+            var connection = {};
+            $(function() {
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/ring/a")
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+                connection.start();
+                connection.on('Test', (message) => {
+                    const encodedMsg = message;
+                    const li = document.createElement('li');
+                    li.textContent = encodedMsg;
+                    document.getElementById('messagesList').appendChild(li);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <ul id="messagesList"></ul>
+    </body>
+</html>
