@@ -5,9 +5,9 @@ using Imuaythai.Refereeing.Models;
 
 namespace Imuaythai.Refereeing.Services
 {
-    public interface IFightService
+    public interface IFightService 
     {
-        Task<IEnumerable<PlainFight>> GetFightListAsync(char ring);
+        Task<IEnumerable<PlainFight>> GetFightListAsync(char ring, int contestId);
         Task<Fight> GetFightAsync(int fightId);
         Task<FightTime> ResumeFightAsync(int fightId);
         Task<FightTime> PauseFightAsync(int fightId);

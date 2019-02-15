@@ -37,9 +37,9 @@ namespace Imuaythai.Refereeing.Hubs
         }
 
         [HubMethodName("GetFights")]
-        public async Task GetFightList(char ring)
+        public async Task GetFightList(char ring, int constestId)
         {
-            var fights = await _fightService.GetFightListAsync(ring);
+            var fights = await _fightService.GetFightListAsync(ring, constestId);
             await Clients.Caller.SendAsync(ClientMethods.FightListReceived, fights);
         }
 

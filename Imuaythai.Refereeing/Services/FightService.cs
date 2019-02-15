@@ -53,9 +53,9 @@ namespace Imuaythai.Refereeing.Services
             return _fightStorage.GetAsync(fightId);
         }
 
-        public Task<IEnumerable<PlainFight>> GetFightListAsync(char ring)
+        public Task<IEnumerable<PlainFight>> GetFightListAsync(char ring, int contestId)
         {
-            return _fightStorage.GetAllAsync(ring);
+            return _fightStorage.GetAllAsync(ring, contestId);
         }
 
         public async Task<JudgePoints> GetPointsAsync(int fightId, Guid judgePointsId)

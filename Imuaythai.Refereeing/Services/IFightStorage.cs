@@ -14,7 +14,7 @@ namespace Imuaythai.Refereeing.Services
     {
         Task<Fight> GetAsync(int fightId);
         Task SaveAsync(Fight points);
-        Task<IEnumerable<PlainFight>> GetAllAsync(char ring);
+        Task<IEnumerable<PlainFight>> GetAllAsync(char ring, int contestId);
     }
 
     public class RedisFightStorage : IFightStorage
@@ -29,11 +29,11 @@ namespace Imuaythai.Refereeing.Services
             _cacheClient = new StackExchangeRedisCacheClient(redis, serializer);
         }
 
-        public async Task<IEnumerable<PlainFight>> GetAllAsync(char ring)
+        public async Task<IEnumerable<PlainFight>> GetAllAsync(char ring, int contestId)
         {
             var keys = await _cacheClient.SearchKeysAsync("*");
             var fightRecords = await _cacheClient.GetAllAsync<Fight>(keys);
-            var fights = fightRecords.Values.Where(f => f.Ring == ring).Select(f => new PlainFight
+            var fights = fightRecords.Values.Where(f => f.Ring == ring && f.ContestId == contestId).Select(f => new PlainFight
             {
                 Id = f.Id,
                 RedFighter = $"{f.RedFighter.FirstName} {f.RedFighter.Surname}",
