@@ -11,11 +11,18 @@ namespace Imuaythai.Refereeing.Hubs
     {
         private readonly IFightService _fightService;
 
+
         public RingHub(IFightService fightService)
         {
+            Console.WriteLine("RingHub created");
             _fightService = fightService;
             _fightService.OnBreakIsOver += OnBreakIsOver;
             _fightService.OnRoundIsOver += OnRoundIsOver;
+        }
+
+        public async Task SendMessage(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
 
         private async void OnRoundIsOver(int fightId)
@@ -26,6 +33,12 @@ namespace Imuaythai.Refereeing.Hubs
         private async void OnBreakIsOver(int fightId)
         {
             await Clients.All.SendAsync(ClientMethods.BreakEnded, fightId);
+        }
+
+        [HubMethodName("Test")]
+        public async Task Join(string message)
+        {
+            await Clients.All.SendAsync(ClientMethods.BreakEnded, 0);
         }
 
         [HubMethodName("Join")]

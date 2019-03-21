@@ -31,14 +31,19 @@ namespace Imuaythai.Refereeing.Services
 
         public async Task<IEnumerable<PlainFight>> GetAllAsync(char ring, int contestId)
         {
+
+            List<PlainFight> fights = new List<PlainFight>();
+
             var keys = await _cacheClient.SearchKeysAsync("*");
-            var fightRecords = await _cacheClient.GetAllAsync<Fight>(keys);
-            var fights = fightRecords.Values.Where(f => f.Ring == ring && f.ContestId == contestId).Select(f => new PlainFight
-            {
-                Id = f.Id,
-                RedFighter = $"{f.RedFighter.FirstName} {f.RedFighter.Surname}",
-                BlueFighter = $"{f.BlueFighter.FirstName} {f.BlueFighter.Surname}",
-            });
+            foreach (string key in keys) {
+                var fightRecords = await _cacheClient.SetMembersAsync<Fight>(key);
+                fights.AddRange(fightRecords.Where(f => f.Ring == ring && f.ContestId == contestId).Select(f => new PlainFight
+                {
+                    Id = f.Id,
+                    RedFighter = $"{f.RedFighter.FirstName} {f.RedFighter.Surname}",
+                    BlueFighter = $"{f.BlueFighter.FirstName} {f.BlueFighter.Surname}",
+                }));
+            }
 
             return fights;
         }

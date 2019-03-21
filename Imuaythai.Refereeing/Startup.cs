@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Imuaythai.Refereeing.Hubs;
+﻿using Imuaythai.Refereeing.Hubs;
 using Imuaythai.Refereeing.Services;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Hosting; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection; 
+
+using Microsoft.AspNetCore.Http; 
 
 namespace Imuaythai.Refereeing
 {
@@ -26,16 +21,20 @@ namespace Imuaythai.Refereeing
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             services.AddSignalR();
 
-            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
-             {
-                 builder.AllowAnyMethod().AllowAnyHeader()
-                        .AllowAnyOrigin()
-                        .AllowCredentials();
-             }));
-
+            services.AddTransient<IRoundTimer, RoundTimer>();
+            services.AddTransient<IBreaksTimer, BreaksTimer>();
+            services.AddTransient<IWinnerCalculator, WinnerCalculator>();
             services.AddTransient<IFightService, FightService>();
             services.AddTransient<IFightStorage, RedisFightStorage>();
         }
@@ -48,20 +47,20 @@ namespace Imuaythai.Refereeing
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
-            app.UseSignalR(config =>
-               {
-                   config.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/a"));
-                   config.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/b"));
-                   config.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/c"));
-               });
-
-            app.UseCors("CorsPolicy");
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<RingHub>("/chatHub");
+                routes.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/a"));
+                routes.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/b"));
+                routes.MapHub<RingHub>(new Microsoft.AspNetCore.Http.PathString("/ring/c"));
+            }); 
             app.UseMvc();
         }
     }
